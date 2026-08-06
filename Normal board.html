@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deal or No Deal Board</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <table class="board">
+        <tr>
+            <td>
+                <div>
+                    <button class="normalamount" value=0.01><span class="currencysign">$</span><span>.01</span></button><br>
+                    <button class="normalamount" value=1><span class="currencysign">$</span><span>1</span></button><br>
+                    <button class="normalamount" value=5><span class="currencysign">$</span><span>5</span></button><br>
+                    <button class="normalamount" value=10><span class="currencysign">$</span><span>10</span></button><br>
+                    <button class="normalamount" value=25><span class="currencysign">$</span><span>25</span></button><br>
+                    <button class="normalamount" value=50><span class="currencysign">$</span><span>50</span></button><br>
+                    <button class="normalamount" value=75><span class="currencysign">$</span><span>75</span></button><br>
+                    <button class="normalamount" value=100><span class="currencysign">$</span><span>100</span></button><br>
+                    <button class="normalamount" value=200><span class="currencysign">$</span><span>200</span></button><br>
+                    <button class="normalamount" value=300><span class="currencysign">$</span><span>300</span></button><br>
+                    <button class="normalamount" value=400><span class="currencysign">$</span><span>400</span></button><br>
+                    <button class="normalamount" value=500><span class="currencysign">$</span><span>500</span></button><br>
+                    <button class="normalamount" value=750><span class="currencysign">$</span><span>750</span></button>
+                </div>
+            </td>
+            <td>
+                <div>
+                    <button class="normalamount" value=1000><span class="currencysign">$</span><span>1,000</span></button><br>
+                    <button class="normalamount" value=5000><span class="currencysign">$</span><span>5,000</span></button><br>
+                    <button class="normalamount" value=10000><span class="currencysign">$</span><span>10,000</span></button><br>
+                    <button class="normalamount" value=25000><span class="currencysign">$</span><span>25,000</span></button><br>
+                    <button class="normalamount" value=50000><span class="currencysign">$</span><span>50,000</span></button><br>
+                    <button class="normalamount" value=75000><span class="currencysign">$</span><span>75,000</span></button><br>
+                    <button class="normalamount" value=100000><span class="currencysign">$</span><span>100,000</span></button><br>
+                    <button class="normalamount" value=200000><span class="currencysign">$</span><span>200,000</span></button><br>
+                    <button class="normalamount" value=300000><span class="currencysign">$</span><span>300,000</span></button><br>
+                    <button class="normalamount" value=400000><span class="currencysign">$</span><span>400,000</span></button><br>
+                    <button class="normalamount" value=500000><span class="currencysign">$</span><span>500,000</span></button><br>
+                    <button class="normalamount" value=750000><span class="currencysign">$</span><span>750,000</span></button><br>
+                    <button class="normalamount" value=1000000><span class="currencysign">$</span><span>1,000,000</span></button>
+                </div>
+            </td>
+        </tr>
+    </table>
+    <div class="controls">
+        <button class="offer">Banker's offer</button>
+        <button class="reset">Reset</button>
+    </div>
+
+    <div id="offerModal">
+    <div id="offerBox">
+        <button id="closeOffer">OK</button>
+        <h2>Banker's Offer</h2>
+        <h1 id="offerAmount"></h1>
+    </div>
+
+</div>
+    <script src="script.js"></script>
+</body>
+</html>

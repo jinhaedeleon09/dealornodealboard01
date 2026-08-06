@@ -1,0 +1,169 @@
+* {
+    font-family:"Michroma";
+    src: url('fonts/Michroma-Regular.ttf') format('truetype');
+    font-weight:1000;
+    color:black;
+}
+
+body {
+            background-image: url('Images/Background.avif');
+            background-repeat: no-repeat;
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            background-color: #f0f0f0; 
+
+            min-height:100vh;
+
+            display:flex;
+            flex-direction:column;
+            justify-content:center;
+            overflow: hidden;
+        }
+
+button.normalamount {
+    background-color: rgb(255, 239, 95);
+    
+}
+
+button.million /* Only to be used on million dollar mission boards, not normal boards */ {
+    background-color: rgb(235, 233, 233);
+    
+}
+
+button.normalamount, button.million {
+    display:flex;
+    width:min(450px, 42vw);
+
+    min-height:34px;
+    font-size: clamp(1rem, 2vw, 2rem);
+    border:none;
+    justify-content: space-between;
+    align-items: center;
+    border-radius:4px;
+    margin:-1.7%;
+
+}
+
+button.normalamount:hover {
+    background-color:rgb(255, 244, 144);
+}
+
+button.million:hover {
+    background-color:gray;
+}
+
+button.normalamount.clicked, button.million.clicked {
+    background-color: rgb(87, 68, 12);
+    border:none;
+}
+
+button.normalamount.clicked:hover, button.million.clicked:hover {
+    background-color: rgb(55, 42, 4);
+    border:none;
+}
+
+button.offer, button.reset {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    width: auto;
+    background-color: rgb(255, 239, 95);
+    border:none;
+    text-align:center;
+    border-radius:4px;
+}
+
+button.offer:hover, button.reset:hover {
+    background-color:rgb(255, 244, 144)
+}
+
+button.offer:disabled,
+button.reset:disabled {
+    background-color: rgb(87,68,12);
+    color: black;
+    cursor: not-allowed;
+}
+
+button.offer:disabled:hover,
+button.reset:disabled:hover {
+
+    background-color: rgb(87,68,12);
+
+}
+
+span.currencysign {
+    text-align:left;
+    font-size:75%;
+}
+
+table.board {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+}
+
+table.board td {
+    width: 45%;
+}
+
+#offerModal{
+
+    position:fixed;
+    inset:0;
+
+    background:rgba(0,0,0,.35);
+
+    display:none;
+
+    justify-content:center;
+    align-items:center;
+
+}
+
+#offerBox{
+
+    width:450px;
+
+    background:rgb(255, 239, 95);
+
+    border-radius:10px;
+
+    padding:25px;
+
+    position:relative;
+
+    text-align:center;
+
+}
+
+#closeOffer{
+
+    position:absolute;
+
+    top:10px;
+
+    right:10px;
+
+    background:#f0f0f0;
+
+    color:black;
+
+    border:none;
+
+    border-radius:4px;
+}
+
+#closeOffer:hover{
+
+    background:rgb(200, 200, 200);
+
+}
+
+.controls {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 20px;
+}
