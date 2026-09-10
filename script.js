@@ -3,9 +3,13 @@ const offerButton = document.querySelector(".offer");
 const resetButton = document.querySelector(".reset");
 const closeOfferButton = document.getElementById("closeOffer");
 
-const OFFER_BREAKPOINTS = [6, 11, 15, 18, 20, 21, 22, 23, 24];
+const offerModal = document.getElementById("offerModal");
+const offerAmount = document.getElementById("offerAmount");
+const offerHistory = document.getElementById("offerHistory");
 
+const OFFER_BREAKPOINTS = [6, 11, 15, 18, 20, 21, 22, 23, 24];
 const STORAGE_PREFIX = "dealNoDeal_";
+const MIN_POWER = 0.35;
 
 // -------------------------
 // Load saved board
@@ -13,7 +17,13 @@ const STORAGE_PREFIX = "dealNoDeal_";
 
 buttons.forEach((button, index) => {
 
-    if (localStorage.getItem(STORAGE_PREFIX + index) === "clicked") {
+    const clickedKey = STORAGE_PREFIX + "clicked_" + index;
+    const legacyKey = STORAGE_PREFIX + index;
+
+    if (
+        localStorage.getItem(clickedKey) === "clicked" ||
+        localStorage.getItem(legacyKey) === "clicked"
+    ) {
         button.classList.add("clicked");
     }
 
@@ -73,6 +83,140 @@ function roundOffer(offer) {
 
 }
 
+function calculateOffer(remaining, currentRound) {
+
+    if (remaining.length === 0) {
+        return 0;
+    }
+
+    const sum = remaining.reduce((a, b) => a + b, 0);
+    const arithmeticMean = sum / remaining.length;
+
+    const power = Math.max(
+        MIN_POWER,
+        1 - (currentRound / 9) * (1 - MIN_POWER)
+    );
+
+    const powerMean = Math.pow(
+        remaining.reduce(
+            (total, value) => total + Math.pow(value, power),
+            0
+        ) / remaining.length,
+        1 / power
+    );
+
+    const offer = powerMean * (currentRound / 9);
+
+    return roundOffer(offer);
+
+}
+
+function formatMoney(amount) {
+
+    return amount.toLocaleString("en-US", {
+
+        minimumFractionDigits: amount < 10 ? 2 : 0,
+        maximumFractionDigits: 2
+
+    });
+
+}
+
+function normalizeOfferHistory(history) {
+
+    if (!Array.isArray(history)) {
+        return [];
+    }
+
+    return history
+        .filter(item => item !== null)
+        .map((item, index) => {
+
+            if (typeof item === "number") {
+                return {
+                    breakpoint: OFFER_BREAKPOINTS[index] ?? 0,
+                    offer: Number(item)
+                };
+            }
+
+            if (typeof item === "object") {
+                const breakpoint = Number(item.breakpoint);
+                const offer = Number(item.offer);
+
+                if (!Number.isFinite(breakpoint) || !Number.isFinite(offer)) {
+                    return null;
+                }
+
+                return {
+                    breakpoint,
+                    offer
+                };
+            }
+
+            return null;
+
+        })
+        .filter(item => item && item.breakpoint > 0)
+        .sort((a, b) => a.breakpoint - b.breakpoint);
+
+}
+
+function getOfferHistory() {
+
+    const saved = localStorage.getItem(STORAGE_PREFIX + "offerHistory");
+
+    if (!saved) {
+        return [];
+    }
+
+    try {
+        return normalizeOfferHistory(JSON.parse(saved));
+    } catch {
+        return [];
+    }
+
+}
+
+function saveOfferHistory(history) {
+
+    localStorage.setItem(
+        STORAGE_PREFIX + "offerHistory",
+        JSON.stringify(history)
+    );
+
+}
+
+function syncOfferHistoryWithBoard(opened) {
+
+    const history = getOfferHistory();
+    const trimmed = history.filter(
+        entry => entry.breakpoint <= opened
+    );
+
+    saveOfferHistory(trimmed);
+
+}
+
+function displayOfferHistory() {
+
+    if (!offerHistory) {
+        return;
+    }
+
+    const history = getOfferHistory();
+
+    offerHistory.innerHTML = "";
+
+    history.forEach(entry => {
+
+        const listItem = document.createElement("li");
+        listItem.textContent = "$" + formatMoney(entry.offer);
+        offerHistory.appendChild(listItem);
+
+    });
+
+}
+
 // -------------------------
 // Button state
 // -------------------------
@@ -83,8 +227,7 @@ function updateButtons() {
 
     resetButton.disabled = opened === 0;
 
-    const offerReady =
-        OFFER_BREAKPOINTS.includes(opened)
+    const offerReady = OFFER_BREAKPOINTS.includes(opened);
 
     offerButton.disabled = !offerReady;
 
@@ -99,22 +242,26 @@ buttons.forEach((button, index) => {
     button.addEventListener("click", () => {
 
         const wasClicked = button.classList.contains("clicked");
+        const clickedKey = STORAGE_PREFIX + "clicked_" + index;
+        const legacyKey = STORAGE_PREFIX + index;
 
         if (wasClicked) {
 
             button.classList.remove("clicked");
-            localStorage.removeItem(STORAGE_PREFIX + index);
+            localStorage.removeItem(clickedKey);
+            localStorage.removeItem(legacyKey);
 
         } else {
 
             button.classList.add("clicked");
-            localStorage.setItem(STORAGE_PREFIX + index, "clicked");
+            localStorage.setItem(clickedKey, "clicked");
+            localStorage.removeItem(legacyKey);
 
         }
 
-        // Once another amount is opened,
-        // the previous offer is considered over.
-
+        syncOfferHistoryWithBoard(getOpenedCount());
+        offerModal.style.display = "none";
+        displayOfferHistory();
         updateButtons();
 
     });
@@ -132,27 +279,33 @@ offerButton.addEventListener("click", () => {
     if (remaining.length === 0)
         return;
 
-    const sum = remaining.reduce((a, b) => a + b, 0);
+    const opened = getOpenedCount();
+    const currentRound = getCurrentRound(opened);
+    const offer = calculateOffer(remaining, currentRound);
 
-    const average = sum / remaining.length;
+    const history = getOfferHistory();
+    const existingIndex = history.findIndex(entry => entry.breakpoint === opened);
 
-    const currentRound = getCurrentRound(getOpenedCount());
+    if (existingIndex >= 0) {
+        history[existingIndex] = {
+            breakpoint: opened,
+            offer
+        };
+    } else {
+        history.push({
+            breakpoint: opened,
+            offer
+        });
+    }
 
-    let offer = average * (currentRound / 9);
+    history.sort((a, b) => a.breakpoint - b.breakpoint);
+    saveOfferHistory(history);
 
-    offer = roundOffer(offer);
+    offerAmount.textContent = "$" + formatMoney(offer);
 
-    const displayOffer = offer.toLocaleString("en-US", {
+    displayOfferHistory();
 
-        minimumFractionDigits: offer < 10 ? 2 : 0,
-        maximumFractionDigits: 2
-
-    });
-
-    document.getElementById("offerAmount").textContent =
-        "$" + displayOffer;
-
-    document.getElementById("offerModal").style.display = "flex";
+    offerModal.style.display = "flex";
 
 });
 
@@ -162,7 +315,7 @@ offerButton.addEventListener("click", () => {
 
 closeOfferButton.addEventListener("click", () => {
 
-    document.getElementById("offerModal").style.display = "none";
+    offerModal.style.display = "none";
 
     updateButtons();
 
@@ -181,11 +334,17 @@ resetButton.addEventListener("click", () => {
 
         button.classList.remove("clicked");
 
+        localStorage.removeItem(STORAGE_PREFIX + "clicked_" + index);
         localStorage.removeItem(STORAGE_PREFIX + index);
 
     });
 
+    localStorage.removeItem(STORAGE_PREFIX + "offerHistory");
+
+    offerModal.style.display = "none";
+
     updateButtons();
+    displayOfferHistory();
 
 });
 
@@ -193,4 +352,6 @@ resetButton.addEventListener("click", () => {
 // Initial setup
 // -------------------------
 
+syncOfferHistoryWithBoard(getOpenedCount());
+displayOfferHistory();
 updateButtons();
