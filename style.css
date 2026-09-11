@@ -150,8 +150,8 @@ table.board td {
 #offerHistory {
     margin: 0;
     padding-left: 30px;
-    max-height: 200px;
-    overflow-y: auto;
+    max-height: none;
+    overflow-y: visible;
 }
 
 #offerHistory li {
