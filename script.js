@@ -9,7 +9,7 @@ const offerHistory = document.getElementById("offerHistory");
 
 const OFFER_BREAKPOINTS = [6, 11, 15, 18, 20, 21, 22, 23, 24];
 const STORAGE_PREFIX = "dealNoDeal_";
-const MIN_POWER = 0.35;
+const OFFER_RATES = [0, 0.10, 0.15, 0.20, 0.30, 0.40, 0.50, 0.65, 0.80, 0.97];
 
 // -------------------------
 // Load saved board
@@ -91,21 +91,15 @@ function calculateOffer(remaining, currentRound) {
 
     const sum = remaining.reduce((a, b) => a + b, 0);
     const arithmeticMean = sum / remaining.length;
-
-    const power = Math.max(
-        MIN_POWER,
-        1 - (currentRound / 9) * (1 - MIN_POWER)
-    );
-
-    const powerMean = Math.pow(
-        remaining.reduce(
-            (total, value) => total + Math.pow(value, power),
-            0
-        ) / remaining.length,
-        1 / power
-    );
-
-    const offer = powerMean * (currentRound / 9);
+    const finalRound = Math.max(1, OFFER_BREAKPOINTS.length);
+    const progress = Math.min(currentRound / finalRound, 1);
+    const ratePosition = progress * (OFFER_RATES.length - 1);
+    const lowerRateIndex = Math.floor(ratePosition);
+    const upperRateIndex = Math.min(lowerRateIndex + 1, OFFER_RATES.length - 1);
+    const interpolation = ratePosition - lowerRateIndex;
+    const offerRate = OFFER_RATES[lowerRateIndex]
+        + (OFFER_RATES[upperRateIndex] - OFFER_RATES[lowerRateIndex]) * interpolation;
+    const offer = arithmeticMean * offerRate;
 
     return roundOffer(offer);
 
