@@ -5,6 +5,10 @@
     color:black;
 }
 
+button {
+    cursor: pointer;
+}
+
 body {
             background-image: url('Images/Background.avif');
             background-repeat: no-repeat;
