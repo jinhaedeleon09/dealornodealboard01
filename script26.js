@@ -9,7 +9,7 @@ const offerHistory = document.getElementById("offerHistory");
 
 const OFFER_BREAKPOINTS = [6, 11, 15, 18, 20, 21, 22, 23, 24];
 const STORAGE_PREFIX = "dealNoDeal_";
-const OFFER_RATES = [0, 0.10, 0.15, 0.20, 0.30, 0.40, 0.50, 0.65, 0.80, 0.97];
+const OFFER_RATES = [0, 0.10, 0.15, 0.20, 0.30, 0.40, 0.50, 0.65, 0.80, 0.99];
 
 // -------------------------
 // Load saved board
@@ -197,9 +197,15 @@ function displayOfferHistory() {
         return;
     }
 
-    const history = getOfferHistory();
+    const opened = getOpenedCount();
+    const history = getOfferHistory().filter(entry => entry.breakpoint < opened);
 
     offerHistory.innerHTML = "";
+
+    if (history.length === 0) {
+        offerHistory.textContent = "-";
+        return;
+    }
 
     history.forEach(entry => {
 
